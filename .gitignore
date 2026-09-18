@@ -1,0 +1,12 @@
+node_modules
+.next
+.env
+.env.local
+data/*.db
+public/uploads/*
+!public/uploads/.gitkeep
+
+# Local development database files
+data/*.db-shm
+data/*.db-wal
+
