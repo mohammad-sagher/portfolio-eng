@@ -32,12 +32,29 @@ function readHash() {
 export async function verifyCredentials(email: string, password: string) {
   const adminEmail = process.env.ADMIN_EMAIL || '';
   const hash = readHash();
-  // Constant-time-ish: always run bcrypt even if email mismatches (no info leakage on failure).
+
+  console.log('[AUTH DEBUG]', {
+    hasAdminEmail: Boolean(process.env.ADMIN_EMAIL),
+    adminEmailLength: adminEmail.length,
+    hasPasswordHash: Boolean(process.env.ADMIN_PASSWORD_HASH),
+    passwordHashPrefix: process.env.ADMIN_PASSWORD_HASH?.slice(0, 4) ?? '',
+    passwordHashLength: process.env.ADMIN_PASSWORD_HASH?.length ?? 0,
+    decodedHashValid: hash.startsWith('$2'),
+    decodedHashLength: hash.length,
+  });
+
   const emailOk = adminEmail.length > 0 && crypto.timingSafeEqual(
     Buffer.from(email.toLowerCase().padEnd(256).slice(0, 256)),
     Buffer.from(adminEmail.toLowerCase().padEnd(256).slice(0, 256)),
   );
+
   const pwOk = hash ? await bcrypt.compare(password, hash) : false;
+
+  console.log('[AUTH DEBUG RESULT]', {
+    emailOk,
+    pwOk,
+  });
+
   return emailOk && pwOk;
 }
 
